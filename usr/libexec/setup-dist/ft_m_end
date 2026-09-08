@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## Reached indirectly; shellcheck cannot follow the dispatch.
+## Reached indirectly.
 # shellcheck disable=SC2317
 
 ## Copyright (C) 2012 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
@@ -17,9 +17,6 @@ shopt -s shift_verbose
 ## The resolved PATH is captured for later use, not just a yes/no answer,
 ## so 'has' cannot replace this.
 ## style-ok: no-has
-
-set -o pipefail
-set -o errtrace
 
 error_handler() {
    local MSG="\
@@ -41,9 +38,6 @@ maybe_start_systemcheck() {
    gui_options=()
    systemcheck_bin_path="$(command -v "${systemcheck_bin}" 2>/dev/null)" || { systemcheck_bin_command_v_exit_code="$?" ; true; };
 
-   ## Exported by setup-wizard-dist when it launches this, so it is absent on
-   ## a direct run -- reading it bare aborts under nounset. Unset previously
-   ## took the else branch, which ":-" reproduces.
    if [ "${started_by_setup_wizard_dist:-}" = "true" ]; then
       ## '--cli' optional.
       gui_options=(--gui --cli)
@@ -75,10 +69,6 @@ maybe_start_systemcheck() {
 #sudo --non-interactive /usr/libexec/setup-dist/setup-dist-done
 leaprun setup-dist-done
 
-## maybe_start_systemcheck returns early -- with "return 0" -- when
-## systemcheck is unavailable, leaving exit_code unset. Default it to 0 so
-## that skip path still exits successfully, as the early return intends,
-## instead of aborting on the unset read.
 exit_code=0
 
 maybe_start_systemcheck

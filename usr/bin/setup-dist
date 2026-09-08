@@ -3,6 +3,8 @@
 ## Copyright (C) 2012 - 2025 ENCRYPTED SUPPORT LLC <adrelanos@whonix.org>
 ## See the file COPYING for copying conditions.
 
+# shellcheck source-path=SCRIPTDIR
+
 ## Debugging
 #set -x
 
@@ -31,6 +33,7 @@ trap "error_handler" ERR
 
 SCRIPTNAME="$(basename -- "${BASH_SOURCE[0]}")"
 
+# shellcheck disable=SC2317
 run_disclaimer_maybe() {
    if [ -f "/var/cache/setup-dist/status-files/disclaimer.done" ]; then
       return 0
@@ -45,37 +48,27 @@ run_disclaimer_maybe() {
       return 0
    fi
 
-   ## Disable disclaimer. Everything below is unreachable and kept as
-   ## documentation of what the disclaimer flow did, exactly like the
-   ## short-circuit in developer-meta-files' dev_clearnet.
+   ## Disable disclaimer.
    return 0
 
-   # shellcheck disable=SC2317
    exit_code="0"
-   # shellcheck disable=SC2317
    ft_disclaimer || { exit_code="$?" ; true; };
 
-   # shellcheck disable=SC2317
    if [ ! "${exit_code}" = "0" ]; then
       printf '%s\n' "You can always enter setup-dist again, by starting: setup-dist"
       exit 0
    fi
 
-   # shellcheck disable=SC2317
    mkdir --parents -- "/var/cache/setup-dist/status-files"
-   # shellcheck disable=SC2317
    touch -- "/var/cache/setup-dist/status-files/disclaimer.done"
 }
 
 check_passwords() {
    local output
    output="$(leaprun get-password-status-list)"
-   if printf '%s' "${output}" | grep --quiet --ignore-case -- 'Absent'; then
-      ## yellow/nocolor come from get_colors.sh, sourced below. shellcheck
-      ## cannot follow that file: it lives in the helper-scripts package, and CI
-      ## checks out this repo alone, so the relative source= path resolves to
-      ## nothing there.
-      # shellcheck disable=SC2154
+   if printf '%s' "${output}" | grep --ignore-case -- 'Absent' >/dev/null 2>&1; then
+      ## FIXME: This is throwing a shellcheck error in CI, we need to make sure
+      ## helper-scripts is available when we run shellcheck.
       printf '%b\n' "[${yellow}NOTICE${nocolor}] Some user accounts on this system are passwordless. Run 'systemcheck' for more information."
    fi
 }
@@ -99,17 +92,11 @@ if [ "$(id -u)" = "0" ]; then
 fi
 
 # shellcheck source=../libexec/setup-dist/shared
-# shellcheck disable=SC1091
 source "/usr/libexec/setup-dist/shared"
-## Provides yellow/nocolor, used by check_passwords below. Sourced BEFORE any
-## use of them -- under nounset an unset colour variable is a hard abort, not a
-## missing escape sequence.
 # shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/get_colors.sh
-# shellcheck disable=SC1091
 source "/usr/libexec/helper-scripts/get_colors.sh"
-# shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/has.sh
-# shellcheck disable=SC1091
-source "/usr/libexec/helper-scripts/has.sh"
+# shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/has.bsh
+source "/usr/libexec/helper-scripts/has.bsh"
 
 has dialog
 has dialog_wrapper
