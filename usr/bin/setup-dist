@@ -95,8 +95,8 @@ fi
 source "/usr/libexec/setup-dist/shared"
 # shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/get_colors.sh
 source "/usr/libexec/helper-scripts/get_colors.sh"
-# shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/has.sh
-source "/usr/libexec/helper-scripts/has.sh"
+# shellcheck source=../../../helper-scripts/usr/libexec/helper-scripts/has.bsh
+source "/usr/libexec/helper-scripts/has.bsh"
 
 has dialog
 has dialog_wrapper
